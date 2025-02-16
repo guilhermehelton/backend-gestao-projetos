@@ -2,14 +2,14 @@ import { ApiProperty } from "@nestjs/swagger";
 import { HabilidadesDTO } from "./HabilidadeDTO";
 
 export class AlunoRequestDTO {
-    @ApiProperty()
+    @ApiProperty({nullable: false})
     nome: string;
-    @ApiProperty()
+    @ApiProperty({nullable: false})
     email: string;
-    @ApiProperty()
+    @ApiProperty({nullable: false})
     senha: string;
-    @ApiProperty({type: HabilidadesDTO, isArray: true})
+    @ApiProperty({type: HabilidadesDTO, isArray: true, nullable: false})
     habilidades: HabilidadesDTO[];
-    @ApiProperty()
+    @ApiProperty({nullable: false})
     semestre: number;
 }

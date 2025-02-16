@@ -3,7 +3,8 @@ import { AlunoRepository } from "../repositories/AlunoRepository";
 import { Aluno } from "../entities/Aluno.entity";
 import { AlunoRequestDTO } from "../dto/AlunoRequestDTO";
 import { HabilidadesRepository } from "../repositories/HabilidadesRepository";
-import { Habilidades } from "../entities/Habilidades.entity";
+import { In } from "typeorm";
+import { AlunoAtualizarDTO } from "../dto/AlunoAtualizarDTO";
 
 @Injectable()
 export class AlunoService {
@@ -28,20 +29,15 @@ export class AlunoService {
     }
 
     async create(aluno: AlunoRequestDTO) : Promise<Aluno> {
-        const habilidades: Habilidades[] = [];
-        aluno.habilidades.forEach(async hab => {
-            const habilidade = await this.habRepository.findOne({where: {id_habilidade: hab.id_habilidade}});
-            if(habilidade) {
-                habilidades.push(habilidade);
-            }
-        })
+        const habilidades = await this.habRepository.findBy({id_habilidade: In(aluno.habilidades.map(e => e.id_habilidade))});
 
         const novoAluno = this.repository.create({
             nome: aluno.nome,
             email: aluno.email,
             senha: aluno.senha,
             semestre: aluno.semestre,
-            habilidades: habilidades
+            habilidades: habilidades,
+            ativo: true
         })
 
         return await this.repository.save(novoAluno);
@@ -55,5 +51,29 @@ export class AlunoService {
 
         aluno.ativo = false;
         return this.repository.save(aluno);
+    }
+
+    async update(aluno: AlunoAtualizarDTO): Promise<Aluno | null> {
+        const novoAluno = await this.repository.findOne({where: {id_aluno: aluno.id_aluno, ativo: true}});
+
+        if (!novoAluno) {
+            return null;
+        }
+
+        if (aluno.habilidades) {
+            const habilidades = await this.habRepository.findBy({id_habilidade: In(aluno.habilidades.map(h => h.id_habilidade))});
+    
+            if (habilidades) {
+                novoAluno.habilidades = habilidades;
+            }
+        }
+
+        if (aluno.nome) {
+            novoAluno.nome = aluno.nome;
+        }
+
+        const alunoSalvo = await this.repository.save(novoAluno);
+
+        return alunoSalvo;
     }
 }

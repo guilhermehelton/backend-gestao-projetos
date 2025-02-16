@@ -16,8 +16,8 @@ CREATE TABLE habilidades (
 );
 
 CREATE TABLE aluno_habilidades (
-	id_aluno serial,
-  id_habilidade serial,
+	id_aluno int,
+  id_habilidade int,
   PRIMARY KEY(id_aluno, id_habilidade),
   CONSTRAINT fk_aluno FOREIGN KEY(id_aluno) REFERENCES aluno(id_aluno),
   CONSTRAINT fk_habilidade FOREIGN KEY(id_habilidade) REFERENCES habilidades(id_habilidade)
@@ -36,8 +36,8 @@ CREATE TABLE vagas (
 
 
 CREATE TABLE vagas_alunos (
-	id_aluno serial,
-  id_vaga serial,
+	id_aluno int,
+  id_vaga int,
   PRIMARY KEY(id_aluno, id_vaga),
   CONSTRAINT fk_aluno FOREIGN KEY(id_aluno) REFERENCES aluno(id_aluno),
   CONSTRAINT fk_vaga FOREIGN KEY(id_vaga) REFERENCES vagas(id_vaga)

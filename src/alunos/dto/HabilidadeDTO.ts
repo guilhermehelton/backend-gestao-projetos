@@ -1,7 +1,7 @@
 import { ApiProperty } from "@nestjs/swagger";
 
 export class HabilidadesDTO {
-    @ApiProperty()
+    @ApiProperty({nullable: false})
     id_habilidade: number;
 
     @ApiProperty()
