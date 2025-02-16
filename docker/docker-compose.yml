@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  postgres-gp:
+    image: postgres:16
+    container_name: postgres_gp
+    restart: always
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: gpdatabase
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data_gp:/var/lib/postgresql/data
+
+volumes:
+  postgres_data_gp:
