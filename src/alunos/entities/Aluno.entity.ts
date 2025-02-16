@@ -12,7 +12,7 @@ export class Aluno {
     @Column({ length: 128 })
     email: string;
 
-    @Column({ length: 256 })
+    @Column({ length: 256, nullable: false })
     senha: string;
 
     @Column()

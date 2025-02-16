@@ -10,6 +10,7 @@ async function bootstrap() {
     .setDescription('Documentação API')
     .setVersion('1.0')
     .addTag('Gestão de Projetos')
+    .addBearerAuth()
     .build();
   const documentFactory = () => SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('', app, documentFactory);

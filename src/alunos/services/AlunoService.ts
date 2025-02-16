@@ -5,6 +5,8 @@ import { AlunoRequestDTO } from "../dto/AlunoRequestDTO";
 import { HabilidadesRepository } from "../repositories/HabilidadesRepository";
 import { In } from "typeorm";
 import { AlunoAtualizarDTO } from "../dto/AlunoAtualizarDTO";
+import { hash } from "bcrypt";
+import { AlunoResponseDTO } from "../dto/AlunoResponseDTO";
 
 @Injectable()
 export class AlunoService {
@@ -13,34 +15,57 @@ export class AlunoService {
         private readonly habRepository: HabilidadesRepository
     ) {}
 
-    async findById(id: number): Promise<Aluno | null> {
-        return await this.repository.findOne({where: {
+    async findById(id: number): Promise<AlunoResponseDTO | null> {
+        const aluno = await this.repository.findOne({where: {
             id_aluno: id,
             ativo: true,
         }, relations: ['habilidades']});
+
+        return aluno ? {...aluno} : null;
     }
 
-    async findAll() {
-        return await this.repository.find({
+    async findAll(): Promise<AlunoResponseDTO[]> {
+        const alunos = await this.repository.find({
             where: {
                 ativo: true
             }, relations: ['habilidades']
         });
+
+        return alunos.map(a => {
+            const mapped = new AlunoResponseDTO();
+            mapped.id_aluno = a.id_aluno;
+            mapped.email = a.email;
+            mapped.habilidades = a.habilidades;
+            mapped.semestre = a.semestre;
+            return mapped;
+        })
     }
 
-    async create(aluno: AlunoRequestDTO) : Promise<Aluno> {
+    async findByEmail(email: string): Promise<AlunoResponseDTO | null> {
+        const aluno = await this.repository.findOne({ where: {
+            email: email,
+            ativo: true
+        }, relations: ['habilidades']});
+        return aluno ? {...aluno} : null;
+    }
+
+    async create(aluno: AlunoRequestDTO) : Promise<AlunoResponseDTO> {
         const habilidades = await this.habRepository.findBy({id_habilidade: In(aluno.habilidades.map(e => e.id_habilidade))});
+
+        const hashPass = await hash(aluno.senha, 10);
 
         const novoAluno = this.repository.create({
             nome: aluno.nome,
             email: aluno.email,
-            senha: aluno.senha,
+            senha: hashPass,
             semestre: aluno.semestre,
             habilidades: habilidades,
             ativo: true
         })
 
-        return await this.repository.save(novoAluno);
+        const alunoSalvo = await this.repository.save(novoAluno);
+
+        return {...alunoSalvo}
     }
 
     async delete(idAluno: number): Promise<Aluno | null> {
@@ -53,7 +78,7 @@ export class AlunoService {
         return this.repository.save(aluno);
     }
 
-    async update(aluno: AlunoAtualizarDTO): Promise<Aluno | null> {
+    async update(aluno: AlunoAtualizarDTO): Promise<AlunoResponseDTO | null> {
         const novoAluno = await this.repository.findOne({where: {id_aluno: aluno.id_aluno, ativo: true}});
 
         if (!novoAluno) {
@@ -74,6 +99,6 @@ export class AlunoService {
 
         const alunoSalvo = await this.repository.save(novoAluno);
 
-        return alunoSalvo;
+        return {...alunoSalvo}
     }
 }
